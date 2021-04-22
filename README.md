@@ -1,2 +1,2 @@
 # Minesweeper
- Kilian, Niklas, Luca, Henrik
+ by Kilian, Niklas, Luca, Henrik
