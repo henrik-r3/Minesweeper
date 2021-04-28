@@ -2,6 +2,7 @@ import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.SwingUtilities;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,7 +19,8 @@ public class Game {
     private int markedTiles;
     private JLabel bombsremaining;
     private JButton restart;
-    private JButton buttons[][]; 
+    private JButton buttons[][];
+    private JButton WLButton = new JButton(); 
     JFrame Gameframe;
     private char[][] gamePanel;
     private Random rnd = new Random();
@@ -160,6 +162,15 @@ public class Game {
                 temp.getModel().setArmed(false);
                 temp.getModel().setPressed(false);
 
+
+                if(markedbombs == 0 & markedTiles == 0){
+                    char tile = getTile(temp);
+                    while(tile == 'X'){
+                        restartEvent();
+                        tile = getTile(temp);
+                    }
+                }
+
                 if (pressed && !lost) {
                     if (SwingUtilities.isRightMouseButton(e)) {
                         if(temp.getBackground() == Color.blue && bombs - markedbombs > 0){
@@ -176,23 +187,22 @@ public class Game {
                     }
                     else {
                         if(temp.getBackground() != Color.red){
-                            for(int i = 0; i < rows; i++){
-                                if((int)temp.getLocation().getX() == ((50*i)+16)){
-                                    for(int j = 0; j < columns; j++){
-                                        if((int)temp.getLocation().getY() == ((50*j)+45)){
-                                            if(gamePanel[i][j] != 'X' && temp.getBackground() != Color.gray){
-                                                temp.setText(Character.toString(gamePanel[i][j]));
-                                                temp.setBackground(Color.gray);
-                                                markedTiles++;
-                                            }else if(gamePanel[i][j] == 'X'){
-                                                solveGame();
-                                                lost = true;
-                                                showLoseScreen();
-                                            }
-                                        }
-                                    }
-                                }    
-                            }
+                            char tile = getTile(temp);
+                            if(tile != 'X' && temp.getBackground() != Color.gray){
+                                if(tile != '0'){
+                                    temp.setText(Character.toString(tile));
+                                }else{
+                                    temp.setText("");
+                                }
+
+                                
+                                temp.setBackground(Color.gray);
+                                markedTiles++;
+                            }else if(tile == 'X'){
+                                solveGame();
+                                lost = true;
+                                showLoseScreen();
+                            }            
                         }
                     }
                 }
@@ -257,7 +267,7 @@ public class Game {
         Gameframe.add(restart);
         restart.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent evt){
-                restartClickEvent(evt);
+                restartEvent();
             }
 
         });
@@ -279,17 +289,41 @@ public class Game {
 
     public void showWinScreen() {
 
-        System.out.println("You won!");
-        // Show the WinScreen
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < columns; j++){
+                buttons[i][j].setVisible(false);
+            }
+        }
+
+        java.awt.Font font = new java.awt.Font("Algerian", java.awt.Font.PLAIN, 20);
+
+        WLButton.setFont(font);
+        WLButton.setBounds(0, 45, Gameframe.getWidth(), Gameframe.getHeight()- 45);
+        WLButton.setText("You did an amazing job! kappa xD ");
+        WLButton.setEnabled(false);
+        Gameframe.add(WLButton);
+        WLButton.setVisible(true);
     }
 
-    public void showLoseScreen() {
+    public void showLoseScreen(){
+        
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < columns; j++){
+                buttons[i][j].setVisible(false);
+            }
+        }
 
-        System.out.println("You lost!");
-        // show the LoseScreen
+        java.awt.Font font = new java.awt.Font("Times New Roman", java.awt.Font.PLAIN, 25);
+
+        WLButton.setFont(font);
+        WLButton.setText("You are a loser! ε> ");
+        WLButton.setBounds(0, 45, Gameframe.getWidth(), Gameframe.getHeight()- 45);
+        WLButton.setEnabled(false);
+        Gameframe.add(WLButton);
+        WLButton.setVisible(true);
     }
 
-    public void restartClickEvent(ActionEvent evt) {
+    public void restartEvent() {
 
         markedTiles = 0;
         markedbombs = 0;
@@ -298,14 +332,30 @@ public class Game {
                 gamePanel[i][j] = ' ';
                 buttons[i][j].setText("");
                 buttons[i][j].setBackground(Color.blue);
+                buttons[i][j].setVisible(true);
             }
         }
+        WLButton.setVisible(false);
         lost = false;
         calculateBombs();
         calculateNumbers();
+        
+    }
 
+    public char getTile(JButton temp){
 
-        // Restart the game(reinitalize the bombs and other fields, make buttons gray
-        // again)
+        char tile = '0'; 
+
+        for(int i = 0; i < rows; i++){
+            if((int)temp.getLocation().getX() == ((50*i)+16)){
+                for(int j = 0; j < columns; j++){
+                    if((int)temp.getLocation().getY() == ((50*j)+45)){
+                        tile = gamePanel[i][j];         
+                    }
+                }
+            }    
+        }
+        return tile;
+
     }
 }
